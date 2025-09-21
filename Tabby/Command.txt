@@ -1,0 +1,1 @@
+.\tabby.exe serve --model StarCoder-1B --device cuda
