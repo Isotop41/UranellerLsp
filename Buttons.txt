@@ -1,0 +1,196 @@
+const AlphaElement = document.querySelector(".overflow-guard");
+
+window.toolbarTheme = {
+    iconColor: "#ffffff",
+    hoverBackground: "#525079",
+    hoverIconColor: "#ffffff",
+    background: "transparent",
+    hoverIconGlow: "#9F9BEC",
+    hoverBorder: "#9F9BEC",
+    toolBarBackground: "#181823",
+    toolBarBorder: "#2E2E3E"
+};
+
+var toolbar = null;
+
+(function () {
+    if (document.getElementById("custom-toolbar")) return;
+    
+    toolbar = document.createElement("div");
+    toolbar.id = "custom-toolbar";
+    toolbar.style.position = "absolute";
+    toolbar.style.top = "10px";
+    toolbar.style.right = "10px";
+    toolbar.style.zIndex = "1000";
+    toolbar.style.backgroundColor = "rgba(24, 24, 35, 0.7)";
+    toolbar.style.backdropFilter = "blur(15px)";
+    toolbar.style.webkitBackdropFilter = "blur(15px)";
+    toolbar.style.padding = "8px";
+    toolbar.style.borderRadius = "14px";
+    toolbar.style.height = "28px";
+    toolbar.style.width = "260px";
+    toolbar.style.borderStyle = "solid";
+    toolbar.style.borderWidth = "2px";
+    toolbar.style.borderColor = window.toolbarTheme.toolBarBorder;
+    toolbar.style.display = "flex";
+    toolbar.style.alignItems = "center";
+    toolbar.style.gap = "8px";
+    toolbar.style.cursor = "default";
+    toolbar.style.userSelect = "none";
+    window.toolbarPointer = toolbar;
+    const dragSVG = `
+<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="20" height="20" viewBox="0 0 24 24">
+  <path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>`;
+    // Drag handle
+const dragHandle = document.createElement("button");
+dragHandle.id = "drag-handle";
+dragHandle.innerHTML = dragSVG;
+dragHandle.style.width = "36px";
+dragHandle.style.height = "36px";
+dragHandle.style.border = "none";
+dragHandle.style.borderRadius = "50%";
+dragHandle.style.backgroundColor = "transparent";
+dragHandle.style.display = "flex";
+dragHandle.style.alignItems = "center";
+dragHandle.style.justifyContent = "center";
+dragHandle.style.cursor = "grab";
+dragHandle.style.transition = "all 0.2s ease";
+dragHandle.style.color = "#ffffff";
+dragHandle.title = "Drag";
+        toolbar.appendChild(dragHandle);
+
+dragHandle.onmouseover = () => {
+    dragHandle.style.backgroundColor = "#444";
+    dragHandle.firstElementChild.style.transform = "scale(0.85)";
+};
+
+dragHandle.onmouseout = () => {
+    dragHandle.style.backgroundColor = "transparent";
+    dragHandle.firstElementChild.style.transform = "scale(1)";
+};
+
+    // Icon SVGs
+    const icons = {
+        execute: `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="20" height="20" viewBox="0 0 24 24"><path d="M21.4086 9.35258C23.5305 10.5065 23.5305 13.4935 21.4086 14.6474L8.59662 21.6145C6.53435 22.736 4 21.2763 4 18.9671L4 5.0329C4 2.72368 6.53435 1.26402 8.59661 2.38548L21.4086 9.35258Z"/></svg>`,
+        clear: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+<path d="M3 6.38597C3 5.90152 3.34538 5.50879 3.77143 5.50879L6.43567 5.50832C6.96502 5.49306 7.43202 5.11033 7.61214 4.54412C7.61688 4.52923 7.62232 4.51087 7.64185 4.44424L7.75665 4.05256C7.8269 3.81241 7.8881 3.60318 7.97375 3.41617C8.31209 2.67736 8.93808 2.16432 9.66147 2.03297C9.84457 1.99972 10.0385 1.99986 10.2611 2.00002H13.7391C13.9617 1.99986 14.1556 1.99972 14.3387 2.03297C15.0621 2.16432 15.6881 2.67736 16.0264 3.41617C16.1121 3.60318 16.1733 3.81241 16.2435 4.05256L16.3583 4.44424C16.3778 4.51087 16.3833 4.52923 16.388 4.54412C16.5682 5.11033 17.1278 5.49353 17.6571 5.50879H20.2286C20.6546 5.50879 21 5.90152 21 6.38597C21 6.87043 20.6546 7.26316 20.2286 7.26316H3.77143C3.34538 7.26316 3 6.87043 3 6.38597Z"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M11.5956 22.0001H12.4044C15.1871 22.0001 16.5785 22.0001 17.4831 21.1142C18.3878 20.2283 18.4803 18.7751 18.6654 15.8686L18.9321 11.6807C19.0326 10.1037 19.0828 9.31524 18.6289 8.81558C18.1751 8.31592 17.4087 8.31592 15.876 8.31592H8.12404C6.59127 8.31592 5.82488 8.31592 5.37105 8.81558C4.91722 9.31524 4.96744 10.1037 5.06788 11.6807L5.33459 15.8686C5.5197 18.7751 5.61225 20.2283 6.51689 21.1142C7.42153 22.0001 8.81289 22.0001 11.5956 22.0001ZM10.2463 12.1886C10.2051 11.7548 9.83753 11.4382 9.42537 11.4816C9.01321 11.525 8.71251 11.9119 8.75372 12.3457L9.25372 17.6089C9.29494 18.0427 9.66247 18.3593 10.0746 18.3159C10.4868 18.2725 10.7875 17.8856 10.7463 17.4518L10.2463 12.1886ZM14.5746 11.4816C14.9868 11.525 15.2875 11.9119 15.2463 12.3457L14.7463 17.6089C14.7051 18.0427 14.3375 18.3593 13.9254 18.3159C13.5132 18.2725 13.2125 17.8856 13.2537 17.4518L13.7537 12.1886C13.7949 11.7548 14.1625 11.4382 14.5746 11.4816Z"/>
+</svg>`,
+        save: `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="20" height="20" viewBox="0 0 24 24"><path d="M17 3H7a2 2 0 00-2 2v14l7-3 7 3V5a2 2 0 00-2-2z"/></svg>`,
+        open: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+<path opacity="0.4" d="M15.7201 2H8.28008C7.90008 2 7.58008 2.32 7.58008 2.7C7.58008 3.08 7.90008 3.4 8.28008 3.4H11.5401L12.9401 5.26C13.2501 5.67 13.2901 5.73 13.8701 5.73H17.5901C17.9701 5.73 18.3401 5.78 18.7001 5.88C18.7401 6.06 18.7601 6.24 18.7601 6.43V6.78C18.7601 7.16 19.0801 7.48 19.4601 7.48C19.8401 7.48 20.1601 7.16 20.1601 6.78V6.42C20.1401 3.98 18.1601 2 15.7201 2Z" />
+<path d="M20.14 6.54C19.71 6.23 19.22 6 18.69 5.87C18.34 5.77 17.96 5.72 17.58 5.72H13.86C13.28 5.72 13.24 5.66 12.93 5.25L11.53 3.39C10.88 2.53 10.37 2 8.74 2H6.42C3.98 2 2 3.98 2 6.42V17.58C2 20.02 3.98 22 6.42 22H17.58C20.02 22 22 20.02 22 17.58V10.14C22 8.65 21.27 7.34 20.14 6.54ZM14.33 16H9.67C9.28 16 8.97 15.69 8.97 15.3C8.97 14.92 9.28 14.6 9.67 14.6H14.32C14.7 14.6 15.02 14.92 15.02 15.3C15.02 15.69 14.71 16 14.33 16Z" />
+</svg>`,
+        debug: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+<path d="M16.19 2H7.81C4.17 2 2 4.17 2 7.81V16.18C2 19.83 4.17 22 7.81 22H16.18C19.82 22 21.99 19.83 21.99 16.19V7.81C22 4.17 19.83 2 16.19 2ZM17.25 12.33C17.25 12.74 16.91 13.08 16.5 13.08C16.09 13.08 15.75 12.74 15.75 12.33V9.31L8.03 17.03C7.88 17.18 7.69 17.25 7.5 17.25C7.31 17.25 7.12 17.18 6.97 17.03C6.68 16.74 6.68 16.26 6.97 15.97L14.69 8.25H11.67C11.26 8.25 10.92 7.91 10.92 7.5C10.92 7.09 11.26 6.75 11.67 6.75H16.5C16.91 6.75 17.25 7.09 17.25 7.5V12.33Z"/>
+</svg>`
+    };
+
+    // Helper to create a styled icon button
+const createIconButton = (id, svg) => {
+    const btn = document.createElement("button");
+    btn.id = `btn-${id}`;
+    btn.innerHTML = svg;
+    
+    btn.style.width = "36px";
+    btn.style.height = "36px";
+    btn.style.border = "none";
+    btn.style.borderRadius = "20%";
+    btn.style.borderStyle = "solid";
+    btn.style.borderWidth = "1px";
+    btn.style.borderColor = window.toolbarTheme.toolBarBackground;
+    btn.style.backgroundColor = window.toolbarTheme.background;
+    btn.style.display = "flex";
+    btn.style.alignItems = "center";
+    btn.style.justifyContent = "center";
+    btn.style.cursor = "pointer";
+    btn.style.transition = "all 0.3s ease";
+    const btnSvg = btn.querySelector("svg");
+    btnSvg.style.transition = "all .3 ease";
+    btn.style.color = window.toolbarTheme.iconColor;
+
+    btn.onmouseover = () => {
+        btn.style.backgroundColor = window.toolbarTheme.hoverBackground;
+        btn.style.borderColor = window.toolbarTheme.hoverBorder;
+        btnSvg.style.filter = `drop-shadow(0 0 6px ${window.toolbarTheme.hoverIconGlow})`;
+        btn.style.color = window.toolbarTheme.hoverIconColor;
+        btn.firstElementChild.style.transform = "scale(0.85)";
+    };
+
+    btn.onmouseout = () => {
+        btn.style.backgroundColor = window.toolbarTheme.background;
+        btn.style.borderColor = window.toolbarTheme.toolBarBackground;
+        btnSvg.style.filter = "none";
+        btn.style.color = window.toolbarTheme.iconColor;
+        btn.firstElementChild.style.transform = "scale(1)";
+    };
+
+    return btn;
+};
+
+    // Create buttons
+    const executeBtn = createIconButton("Execute", icons.execute);
+    const clearBtn = createIconButton("clear", icons.clear);
+    const saveBtn = createIconButton("save", icons.save);
+    const openBtn = createIconButton("open", icons.open);
+    const debugBtn = createIconButton("debug", icons.debug);
+
+    toolbar.appendChild(executeBtn);
+    toolbar.appendChild(clearBtn);
+    toolbar.appendChild(saveBtn);
+    toolbar.appendChild(openBtn);
+    toolbar.appendChild(debugBtn);
+    AlphaElement.appendChild(toolbar);
+
+    // Drag logic
+    let isDragging = false;
+    let offsetX = 0, offsetY = 0;
+
+    dragHandle.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        toolbar.style.opacity = .6
+        offsetX = e.clientX - toolbar.offsetLeft;
+        offsetY = e.clientY - toolbar.offsetTop;
+        dragHandle.style.cursor = "grabbing";
+        document.body.style.userSelect = "none";
+    });
+
+    document.addEventListener("mouseup", () => {
+        isDragging = false;
+        toolbar.style.opacity = 1;
+        dragHandle.style.cursor = "grab";
+        document.body.style.userSelect = "";
+    });
+
+    document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+
+        const parentRect = AlphaElement.getBoundingClientRect();
+        const dragRect = toolbar.getBoundingClientRect();
+
+        let left = e.clientX - offsetX - parentRect.left;
+        let top = e.clientY - offsetY - parentRect.top;
+
+        // Clamp values within parent bounds
+        left = Math.max(0, Math.min(left, AlphaElement.clientWidth - toolbar.clientWidth));
+        top = Math.max(0, Math.min(top, AlphaElement.clientHeight - toolbar.clientHeight));
+    
+        toolbar.style.left = `${left}px`;
+        toolbar.style.top = `${top}px`;
+        });
+    
+    // Button actions
+    clearBtn.onclick = () => {
+        window.editor.setValue("");
+    };
+    saveBtn.onclick = () => {
+        window.chrome.webview.postMessage("SaveClicked");
+    };
+    openBtn.onclick = () => {
+        window.chrome.webview.postMessage("OpenClicked");
+    };
+    debugBtn.onclick = () => {
+        window.chrome.webview.postMessage("APXDebug");
+    };
+})();
